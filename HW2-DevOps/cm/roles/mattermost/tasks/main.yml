@@ -1,0 +1,75 @@
+---
+- name: Unarchive a file that needs to be downloaded (added in 2.0)
+  unarchive:
+    src: https://releases.mattermost.com/5.19.1/mattermost-5.19.1-linux-amd64.tar.gz
+    dest: /home/vagrant/
+    remote_src: yes
+
+- name: Move the folder to /opt
+  command: mv /home/vagrant/mattermost /opt
+  ignore_errors: true
+
+- name: Creates directory for mattermost data
+  file:
+    path: /opt/mattermost/data
+    state: directory
+  ignore_errors: true
+
+- name: Make a mattermost group
+  group:
+    name: "{{name_for_mattermost_group}}"
+    state: present
+
+- name: Create mattermost user
+  user: 
+    name: "{{name_for_mattermost_user}}"
+    system: yes
+    groups: "{{name_for_mattermost_group}}"
+    append: yes
+
+- name: Change file ownership, group and permissions
+  file:
+    path: /opt/mattermost
+    owner: "{{name_for_mattermost_user}}"
+    group: "{{name_for_mattermost_group}}"
+    mode: '0777'
+
+- name: Change mattermost directory permissions
+  file:
+    path: /opt/mattermost
+    state: directory
+    owner: "{{name_for_mattermost_user}}"
+    group: "{{name_for_mattermost_group}}"
+    recurse: yes
+
+- name: make changes to /opt/mattermost/config/config.json
+  lineinfile:
+    dest: /opt/mattermost/config/config.json
+    regexp: '"DataSource":'
+    line: '        "DataSource": "mmuser:mmuser-password@tcp(127.0.0.1:3306)/mattermost?charset=utf8mb4,utf8&readTimeout=30s&writeTimeout=30s",'
+    backrefs: yes
+
+- name: add siteurl in config.json
+  lineinfile:
+    dest: /opt/mattermost/config/config.json
+    regexp: '"SiteURL":'
+    line: '    "SiteURL": "https://mattermost.example.com",'
+    backrefs: yes
+
+- name: Starting mattermost on booting
+  template:  
+    src: mattermost.service.j2
+    dest: /lib/systemd/system/mattermost.service
+
+- name: Reload daemon
+  become: yes
+  systemd:
+    daemon_reload: yes
+
+- name: Enable Mattermost service
+  become: yes
+  service:
+    name: mattermost
+    enabled: yes
+    state: started
+    

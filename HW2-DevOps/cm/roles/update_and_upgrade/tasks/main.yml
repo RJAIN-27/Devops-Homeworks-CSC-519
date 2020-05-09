@@ -1,0 +1,24 @@
+---
+- name: Install python
+  raw: sudo apt-get -y install python
+
+- name: update the server
+  apt: 
+    upgrade: dist
+  become: yes
+
+- name: Upgrade all packages to the latest version
+  apt:
+    name: "*"
+    state: latest
+  become: yes
+  
+- name: Installations of softwares
+  apt:
+    name: '{{ item }}' 
+    state: latest
+  with_items:
+    #- python 
+    - python-mysqldb
+    - mysql-server
+  become: true

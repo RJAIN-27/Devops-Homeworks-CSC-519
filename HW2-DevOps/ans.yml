@@ -1,0 +1,12 @@
+---
+- hosts: localhost
+  remote_user: root
+
+
+  vars_prompt:
+    - name: "name"
+      prompt: "what is your name?"
+    - name: "quest"
+      prompt: "what is your quest?"
+    - name: "favcolor"
+      prompt: "what is your favorite color?"

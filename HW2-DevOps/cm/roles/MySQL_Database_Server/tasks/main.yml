@@ -1,0 +1,21 @@
+---
+- name: start sql server
+  become: yes
+  service: 
+    name: mysql
+    state: started
+    enabled: true
+
+- name: Create a new database with name 'mattermost'
+  mysql_db:
+    name: mattermost
+    state: present
+
+- name: Create database user with password and all database privileges and 'WITH GRANT OPTION'
+  mysql_user:
+    name: "{{name_for_db_user}}"
+    password: "{{password_for_db_user}}"
+    priv: '*.*:ALL,GRANT'
+    state: present
+
+

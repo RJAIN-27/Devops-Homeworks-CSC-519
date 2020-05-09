@@ -1,0 +1,21 @@
+---
+# see the best practices in ansible docs for how to get started with creating roles etc.: 
+# https://docs.ansible.com/ansible/latest/user_guide/playbooks_best_practices.html
+
+- hosts: mattermost
+  become: yes
+  gather_facts: no
+  vars_files:
+    - for_mattermost.yml
+    - for_automation.yml
+  roles:
+    - update_and_upgrade
+    #- ping
+    - MySQL_Database_Server
+    - mattermost
+    - nginx
+    #- ssl
+    - automate
+
+  vars:
+    ansible_python_interpreter: python

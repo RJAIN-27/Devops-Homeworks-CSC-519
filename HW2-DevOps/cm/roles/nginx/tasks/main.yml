@@ -1,0 +1,31 @@
+---
+- name: install nginx
+  package:
+    name: nginx
+    state: present
+
+- name: apply nginx config template to /etc/nginx/sites-available/mattermost
+  template:  
+    src: mattermost.conf.j2
+    dest: /etc/nginx/sites-available/mattermost
+  
+- name: Recursively remove existing default sites-enabled file.
+  file:
+    path: /etc/nginx/sites-enabled/default
+    state: absent
+  become: yes
+
+- name: Create a symbolic link to enable mattermost configuration
+  file:
+    src: /etc/nginx/sites-available/mattermost
+    dest: /etc/nginx/sites-enabled/mattermost
+    state: link
+  become: yes
+
+- name: retstart the nginx service again
+  become: yes
+  service:
+    name: nginx
+    enabled: yes
+    state: restarted
+    

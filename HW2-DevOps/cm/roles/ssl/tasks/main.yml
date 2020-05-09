@@ -1,0 +1,28 @@
+---
+- name: Install git
+  package:
+    name: git
+    state: present
+
+- name: git clone letsencrypt
+  git: 
+    repo: https://github.com/letsencrypt/letsencrypt 
+    dest: /home/vagrant/letsencrypt 
+
+- name: retstart the nginx service again
+  become: yes
+  service: 
+    name: nginx
+    enabled: yes
+    state: stopped
+
+- name: change
+  shell:
+    cmd: cd /home/vagrant/letsencrypt
+  become: yes
+  
+- name: Change the directory and run lenscript installer
+  command: ./letsencrypt-auto certonly --standalone -d mattermost.exampdle.com --email rajshreejain458@gmail.com -A -Y
+  become: yes
+  args:
+    chdir: /home/vagrant/letsencrypt
